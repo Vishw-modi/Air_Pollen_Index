@@ -45,7 +45,13 @@ const GetPollen = () => {
             {
               parts: [
                 {
-                  text: `Provide general precautions for the pollen count is Grass pollen count is ${pollenData.data[0].Count.grass_pollen}, Tree pollen count is ${pollenData.data[0].Count.tree_pollen}, and Weed pollen count is ${pollenData.data[0].Count.weed_pollen}.`,
+                  text: `
+                  Using the provided pollen count data:
+Grass Pollen Count: ${pollenData.data[0].Count.grass_pollen}
+Tree Pollen Count: ${pollenData.data[0].Count.tree_pollen}
+Weed Pollen Count: ${pollenData.data[0].Count.weed_pollen}
+Assess corresponding risk levels and write a detailed health advisory including indoor and outdoor precautions, especially for the highest pollen type. The output should resemble a public health notice.
+                  `,
                 },
               ],
             },

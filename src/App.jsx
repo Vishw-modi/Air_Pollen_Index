@@ -5,20 +5,57 @@ import {
   Route,
   Link,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import PollenIndex from "./PollenIndex";
 import GetPollen from "./GetPollen";
 import { Button } from "./components/ui/button";
 import { cn } from "./lib/utils";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useUser,
+  useAuth,
+} from "@clerk/clerk-react";
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
 
 const Navigation = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
 
   const navItems = [
     { path: "/", label: "Pollen Guide" },
     { path: "/get-pollen", label: "Check Pollen" },
   ];
+
+  const handleNavigation = (path) => {
+    if (path === "/get-pollen" && !isSignedIn) {
+      return;
+    }
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,19 +72,53 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              <div key={item.path}>
+                {item.path === "/get-pollen" && !isSignedIn ? (
+                  <SignInButton mode="modal">
+                    <button
+                      className={cn(
+                        "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
+                        "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+                      )}
+                    >
+                      {item.label}
+                    </button>
+                  </SignInButton>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={cn(
+                      "px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
+                      location.pathname === item.path
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )}
+                    onClick={() => handleNavigation(item.path)}
+                  >
+                    {item.label}
+                  </Link>
                 )}
-              >
-                {item.label}
-              </Link>
+              </div>
             ))}
+          </div>
+
+          {/* Auth Buttons */}
+          <div className="flex items-center space-x-4">
+            <SignedIn>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">
+                  Welcome, {user?.firstName || "User"}
+                </span>
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
+              </SignInButton>
+            </SignedOut>
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,19 +160,33 @@ const Navigation = () => {
           <div className="md:hidden animate-fade-in bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200",
-                    location.pathname === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                <div key={item.path}>
+                  {item.path === "/get-pollen" && !isSignedIn ? (
+                    <SignInButton mode="modal">
+                      <button
+                        className={cn(
+                          "block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200",
+                          "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+                        )}
+                      >
+                        {item.label}
+                      </button>
+                    </SignInButton>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className={cn(
+                        "block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200",
+                        location.pathname === item.path
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                      onClick={() => handleNavigation(item.path)}
+                    >
+                      {item.label}
+                    </Link>
                   )}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -119,7 +204,14 @@ const App = () => {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<PollenIndex />} />
-            <Route path="/get-pollen" element={<GetPollen />} />
+            <Route
+              path="/get-pollen"
+              element={
+                <ProtectedRoute>
+                  <GetPollen />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
         <footer className="border-t py-6">
@@ -152,54 +244,3 @@ const App = () => {
 };
 
 export default App;
-
-// import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
-// import PollenIndex from "./PollenIndex";
-// import GetPollen from "./GetPollen";
-
-// function App() {
-//   return (
-//     <BrowserRouter>
-//       <div className="min-h-screen">
-//         <header className="bg-slate-900  text-white shadow-lg p-4 sticky top-0 z-50">
-//           <nav>
-//             <ul className="flex space-x-4 justify-center">
-//               <li>
-//                 <NavLink
-//                   to="/"
-//                   className={({ isActive }) =>
-//                     isActive
-//                       ? "text-yellow-400 font-semibold"
-//                       : "text-gray-200 font-semibold hover:text-yellow-400"
-//                   }
-//                 >
-//                   Home
-//                 </NavLink>
-//               </li>
-//               <li>
-//                 <NavLink
-//                   to="/get-pollen"
-//                   className={({ isActive }) =>
-//                     isActive
-//                       ? "text-yellow-400 font-semibold"
-//                       : "text-gray-200 font-semibold hover:text-yellow-400"
-//                   }
-//                 >
-//                   Get Pollen
-//                 </NavLink>
-//               </li>
-//             </ul>
-//           </nav>
-//         </header>
-//         <div className="container mx-auto p-6 bg-gray-100 shadow-inner rounded-md">
-//           <Routes>
-//             <Route exact path="/" element={<PollenIndex />} />
-//             <Route exact path="/get-pollen" element={<GetPollen />} />
-//           </Routes>
-//         </div>
-//       </div>
-//     </BrowserRouter>
-//   );
-// }
-
-// export default App;

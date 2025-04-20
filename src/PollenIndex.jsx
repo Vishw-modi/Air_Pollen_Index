@@ -8,6 +8,12 @@ import {
 } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Link } from "react-router-dom";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 
 const PollenIndex = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -239,7 +245,7 @@ const PollenIndex = () => {
                 <p className="text-muted-foreground">
                   Get real-time pollen data for your location
                 </p>
-                <Link to="/get-pollen">
+                <SignInButton forceRedirectUrl="/get-pollen">
                   <Button
                     className="hover:scale-105 transition-transform duration-200"
                     onClick={() =>
@@ -248,7 +254,7 @@ const PollenIndex = () => {
                   >
                     Check Pollen Levels
                   </Button>
-                </Link>
+                </SignInButton>
               </section>
             </div>
           </CardContent>

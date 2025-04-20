@@ -5,56 +5,48 @@ import {
   Route,
   NavLink,
 } from "react-router-dom";
-
 import GetPollen from "./GetPollen";
+import { Button } from "./components/ui/button";
 
 function App() {
   return (
-    <>
-      <>
-        <Router>
-          <div className="min-h-screen pb-11 ">
-            <header className="bg-slate-900 shadow-lg text-white p-4 sticky top-0 z-50">
-              <nav className="flex justify-center items-center">
-                <div className="space-x-4 items-center justify-center">
-                  <NavLink
-                    to="/"
-                    className={({ isActive }) =>
-                      isActive
-                        ? "text-yellow-400 font-semibold px-3"
-                        : "text-gray-200 font-semibold hover:text-yellow-400 px-3"
-                    }
-                  >
-                    Home
-                  </NavLink>
-
-                  <NavLink
-                    to="/get-pollen"
-                    className={({ isActive }) =>
-                      isActive
-                        ? "text-yellow-400 font-semibold px-3"
-                        : "text-gray-200 font-semibold hover:text-yellow-400 px-3"
-                    }
-                  >
-                    Get Pollen
-                  </NavLink>
-                </div>
-              </nav>
-            </header>
-
-            {/* Routes */}
-            <Routes>
-              <Route path="/" element={<PollenIndex />} />
-
-              <Route path="/get-pollen" element={<GetPollen />} />
-            </Routes>
+    <Router>
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-14 items-center">
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground transition-colors hover:text-foreground"
+                }
+              >
+                Home
+              </NavLink>
+              <NavLink
+                to="/get-pollen"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground transition-colors hover:text-foreground"
+                }
+              >
+                Get Pollen
+              </NavLink>
+            </nav>
           </div>
-        </Router>
+        </header>
 
-        {/* <PollenIndex />
-      <GetPollen /> */}
-      </>
-    </>
+        <main className="container py-6">
+          <Routes>
+            <Route path="/" element={<PollenIndex />} />
+            <Route path="/get-pollen" element={<GetPollen />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 

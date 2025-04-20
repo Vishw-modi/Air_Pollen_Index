@@ -7,17 +7,28 @@ import {
   CardDescription,
 } from "./components/ui/card";
 import { Button } from "./components/ui/button";
-import { Link } from "react-router-dom";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/clerk-react";
+import { Link, Navigate } from "react-router-dom";
+import { SignInButton, useAuth } from "@clerk/clerk-react";
+
+const ProtectedRoute = ({ children }) => {
+  const { isLoading, isSignedIn } = useAuth();
+
+  if (!isSignedIn) {
+    return <Navigate to="/" />;
+
+    return children;
+  }
+};
 
 const PollenIndex = () => {
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const { isSignedIn } = useAuth();
 
+  const handleNavigation = () => {
+    if (!isSignedIn) {
+      return;
+    }
+  };
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -245,7 +256,28 @@ const PollenIndex = () => {
                 <p className="text-muted-foreground">
                   Get real-time pollen data for your location
                 </p>
-                <SignInButton forceRedirectUrl="/get-pollen">
+                {!isSignedIn ? (
+                  <SignInButton mode="modal">
+                    <Button
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      Sign In to Check Pollen
+                    </Button>
+                  </SignInButton>
+                ) : (
+                  <Link to="/get-pollen">
+                    <Button
+                      onclick={() => {
+                        window.onscroll({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      Check Pollen Levels
+                    </Button>
+                  </Link>
+                )}
+                {/* <SignInButton mode="model">
                   <Button
                     className="hover:scale-105 transition-transform duration-200"
                     onClick={() =>
@@ -254,7 +286,7 @@ const PollenIndex = () => {
                   >
                     Check Pollen Levels
                   </Button>
-                </SignInButton>
+                </SignInButton> */}
               </section>
             </div>
           </CardContent>

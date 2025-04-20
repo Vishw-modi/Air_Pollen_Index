@@ -4,7 +4,17 @@ Air Pollen Index 🌿 A minimal React + Vite project designed to monitor air pol
 
 Clone the repository git clone https://github.com/Vishw-modi/Air-Pollen-Index
 
-Navigate to the project directory cd Air-Pollen-Index Install dependencies npm install Start the development server npm run dev
+Step 1:
+Open CMD in folder and write this:
+git clone https://github.com/Vishw-modi/Air-Pollen-Index
+
+Step 2:
+Then install the dependencies using;
+npm i
+
+Step 3:
+Then Run the Development Server using :
+npm run dev
 
 🔥 Features ⚡ Vite — Ultra-fast development environment
 

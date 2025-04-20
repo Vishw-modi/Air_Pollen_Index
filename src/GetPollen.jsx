@@ -42,12 +42,13 @@ const GetPollen = () => {
 
   const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
   const API_URL = `https://api.ambeedata.com/latest/pollen/by-place?place=${place}`;
+  const API_KEY = import.meta.env.VITE_AMBEE_API_KEY;
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
   async function getdata() {
     setPrecautionLoading(true);
     try {
-      const uurl =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDAFa7yoX9aC6LxOMjdTEhtnot_ENEEvd4";
+      const uurl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
       const response = await axios({
         url: uurl,
         method: "post",
@@ -58,24 +59,15 @@ const GetPollen = () => {
                 {
                   text: `
                   Using the provided pollen count data:
-
-Grass Pollen Count: ${pollenData.data[0].Count.grass_pollen}
-
-Tree Pollen Count: ${pollenData.data[0].Count.tree_pollen}
-
-Weed Pollen Count: ${pollenData.data[0].Count.weed_pollen}
-
-Assess the risk level for each pollen type (Low, Moderate, High, Very High) based on typical pollen count thresholds.
-
-Write a detailed public health advisory that includes:
-
-General health advice and recommendations.
-
-Specific indoor and outdoor precautions, with extra emphasis on the pollen type that presents the highest risk.
-
-Over-the-counter or commonly prescribed medicine recommendations for allergy relief (such as antihistamines, nasal sprays, or eye drops).
-
-Ensure the advisory reads like an official public health notice, and avoid including any date information.
+                    Grass Pollen Count: ${pollenData.data[0].Count.grass_pollen}
+                    Tree Pollen Count: ${pollenData.data[0].Count.tree_pollen}
+                    Weed Pollen Count: ${pollenData.data[0].Count.weed_pollen}
+                    Assess the risk level for each pollen type (Low, Moderate, High, Very High) based on typical pollen count thresholds.
+                    Write a detailed public health advisory that includes:
+                    General health advice and recommendations.
+                    Specific indoor and outdoor precautions, with extra emphasis on the pollen type that presents the highest risk.
+                    Over-the-counter or commonly prescribed medicine recommendations for allergy relief (such as antihistamines, nasal sprays, or eye drops).
+                    Ensure the advisory reads like an official public health notice, and avoid including any date information.
                   `,
                 },
               ],
@@ -96,24 +88,32 @@ Ensure the advisory reads like an official public health notice, and avoid inclu
   }
 
   const fetchPollenData = async () => {
+    if (!API_KEY) {
+      setError(
+        "API key is missing. Please configure your environment variables."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       const response = await axios.get(CORS_PROXY + API_URL, {
         headers: {
-          "x-api-key": `1522d28eff09b5f35d5d9c92efb3c74175777d1b4357ddd5e7e71818f6610e2d`,
+          "x-api-key": API_KEY,
           "Content-type": "application/json",
         },
       });
       setLoading(false);
       setPollenData(response.data);
-      // Add to search history
       if (place && !searchHistory.includes(place)) {
         setSearchHistory((prev) => [place, ...prev].slice(0, 5));
       }
     } catch (error) {
       setLoading(false);
-      setError("Failed to fetch pollen data. Please try again.");
+      setError(
+        "Failed to fetch pollen data. Please check your API key and try again."
+      );
       console.error("Error fetching pollen data:", error);
     }
   };
@@ -135,7 +135,9 @@ Ensure the advisory reads like an official public health notice, and avoid inclu
   }, [place]);
 
   useEffect(() => {
-    fetchPollenData();
+    if (place.trim() !== "") {
+      fetchPollenData();
+    }
   }, []);
 
   const getPollenChartData = () => {
@@ -418,7 +420,7 @@ Ensure the advisory reads like an official public health notice, and avoid inclu
                 </div>
               )}
           </CardContent>
-          <CardFooter className="flex justify-center">
+          <CardFooter className="flex justify-center border-t mt-4">
             <p className="text-sm text-muted-foreground">
               Data provided by Ambee API | Last updated:{" "}
               {new Date().toLocaleDateString()}
@@ -427,7 +429,7 @@ Ensure the advisory reads like an official public health notice, and avoid inclu
         </Card>
       </div>
 
-      <Footer className="border-t">
+      {/* <Footer className="border-t mt-auto">
         <FooterContent>
           <FooterText>
             © {new Date().getFullYear()} Air Pollen Index. All rights reserved.
@@ -442,7 +444,7 @@ Ensure the advisory reads like an official public health notice, and avoid inclu
             </a>
           </FooterText>
         </FooterContent>
-      </Footer>
+      </Footer> */}
     </div>
   );
 };

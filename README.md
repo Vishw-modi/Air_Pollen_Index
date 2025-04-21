@@ -7,6 +7,7 @@ Clone the repository git clone https://github.com/Vishw-modi/Air-Pollen-Index
 Step 1:
 Open CMD in folder and write this:
 git clone https://github.com/Vishw-modi/Air-Pollen-Index
+cd Air-Pollen-Index
 
 Step 2:
 Then install the dependencies using;
